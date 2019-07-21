@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         word2 = words.get(random.nextInt(words.size()));
 
         String scrambled = scramble(word1,word2);
-        messageBox.setText(scrambled);
+//        messageBox.setText(scrambled);
         ArrayList<Character> s = new ArrayList<>();
         for (Character e : scrambled.toCharArray()){
             s.add(e);
