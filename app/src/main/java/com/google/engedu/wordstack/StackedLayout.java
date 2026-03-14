@@ -24,7 +24,7 @@ import java.util.Stack;
 
 public class StackedLayout extends LinearLayout {
 
-    private Stack<View> tiles = new Stack<>();
+    private final Stack<View> tiles = new Stack<>();
 
     public StackedLayout(Context context) {
         super(context);

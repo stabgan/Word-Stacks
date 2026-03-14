@@ -27,8 +27,9 @@ The scrambling algorithm randomly interleaves characters from both words while p
 | 📱 Platform | Android (minSdk 24 · targetSdk 34) |
 | ☕ Language | Java 8 |
 | 🏗️ UI | XML Layouts · Drag & Drop API |
-| 📦 Libraries | AndroidX AppCompat · Material Components |
-| 🔧 Build | Gradle 7.5 · AGP 7.4.2 |
+| 📦 Libraries | AndroidX AppCompat 1.7.1 · Material Components 1.12.0 |
+| 🔧 Build | Gradle 8.0 · AGP 8.1.0 |
+| 🧪 Testing | JUnit 4.13.2 · Espresso 3.7.0 |
 
 ## Getting Started
 
