@@ -22,7 +22,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class LetterTile extends TextView {
@@ -40,11 +39,12 @@ public class LetterTile extends TextView {
         setWidth(TILE_SIZE);
         setTextSize(30);
         setBackgroundColor(Color.rgb(255, 255, 200));
+        setContentDescription("Letter tile: " + letter);
     }
 
     public void moveToViewGroup(ViewGroup targetView) {
         ViewParent parent = getParent();
-        if (parent instanceof StackedLayout ) {
+        if (parent instanceof StackedLayout) {
             StackedLayout owner = (StackedLayout) parent;
             owner.pop();
             targetView.addView(this);
@@ -68,12 +68,15 @@ public class LetterTile extends TextView {
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
-        if((motionEvent.getAction() == MotionEvent.ACTION_DOWN) && (!frozen))
-        {
-            startDrag(ClipData.newPlainText("", ""), new View.DragShadowBuilder(this), this, 0);
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && !frozen) {
+            startDragAndDrop(
+                    ClipData.newPlainText("", ""),
+                    new View.DragShadowBuilder(this),
+                    this,
+                    0
+            );
             return true;
         }
         return super.onTouchEvent(motionEvent);
-
     }
 }

@@ -17,7 +17,7 @@ package com.google.engedu.wordstack;
 
 import android.content.res.AssetManager;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -34,8 +34,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Stack;
-
-import static com.google.engedu.wordstack.StackedLayout.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,26 +54,24 @@ public class MainActivity extends AppCompatActivity {
         try {
             InputStream inputStream = assetManager.open("words.txt");
             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-            String line = null;
-            while((line = in.readLine()) != null) {
+            String line;
+            while ((line = in.readLine()) != null) {
                 String word = line.trim();
-                if(word.length() == WORD_LENGTH){
+                if (word.length() == WORD_LENGTH) {
                     words.add(word);
                 }
             }
+            in.close();
         } catch (IOException e) {
-            Toast toast = Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG);
-            toast.show();
+            Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG).show();
         }
         LinearLayout verticalLayout = findViewById(R.id.vertical_layout);
         stackedLayout = new StackedLayout(this);
         verticalLayout.addView(stackedLayout, 3);
 
         View word1LinearLayout = findViewById(R.id.word1);
-//        word1LinearLayout.setOnTouchListener(new TouchListener());
         word1LinearLayout.setOnDragListener(new DragListener());
         View word2LinearLayout = findViewById(R.id.word2);
-//        word2LinearLayout.setOnTouchListener(new TouchListener());
         word2LinearLayout.setOnDragListener(new DragListener());
     }
 
@@ -91,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
                     messageBox.setText(word1 + " " + word2);
                 }
                 placedTiles.push(tile);
-
                 return true;
             }
             return false;
@@ -101,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
     private class DragListener implements View.OnDragListener {
 
         public boolean onDrag(View v, DragEvent event) {
-            int action = event.getAction();
             switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED:
                     v.setBackgroundColor(LIGHT_BLUE);
@@ -120,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                     v.invalidate();
                     return true;
                 case DragEvent.ACTION_DROP:
-                    // Dropped, reassign Tile to the target Layout
                     LetterTile tile = (LetterTile) event.getLocalState();
                     tile.moveToViewGroup((ViewGroup) v);
                     if (stackedLayout.empty()) {
@@ -134,58 +127,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public String scramble(String word1 , String word2){
-        int c1 = 0 , c2 = 0;
+    public String scramble(String word1, String word2) {
+        int c1 = 0, c2 = 0;
         StringBuilder res = new StringBuilder();
 
-        while (c1 < word1.length() && c2 < word2.length()){
-            if (random.nextInt(2) == 0 ) {
-
+        while (c1 < word1.length() && c2 < word2.length()) {
+            if (random.nextInt(2) == 0) {
                 res.append(word1.charAt(c1));
                 c1++;
-            }
-            else {
+            } else {
                 res.append(word2.charAt(c2));
                 c2++;
             }
         }
-        if ( c1 == word1.length()){
-            res.append(word2.substring(c2,word2.length()));
-        }
-        else {
-            res.append(word1.substring(c1,word1.length()));
+        if (c1 == word1.length()) {
+            res.append(word2.substring(c2));
+        } else {
+            res.append(word1.substring(c1));
         }
 
-        return new String(res.reverse());
+        return res.reverse().toString();
     }
 
     public boolean onStartGame(View view) {
         stackedLayout.clear();
         placedTiles.clear();
-        ((LinearLayout)findViewById(R.id.word1)).removeAllViews();
-        ((LinearLayout)findViewById(R.id.word2)).removeAllViews();
+        ((LinearLayout) findViewById(R.id.word1)).removeAllViews();
+        ((LinearLayout) findViewById(R.id.word2)).removeAllViews();
         TextView messageBox = findViewById(R.id.message_box);
         messageBox.setText("Game started");
 
         word1 = words.get(random.nextInt(words.size()));
         word2 = words.get(random.nextInt(words.size()));
-
-        String scrambled = scramble(word1,word2);
-//        messageBox.setText(scrambled);
-        ArrayList<Character> s = new ArrayList<>();
-        for (Character e : scrambled.toCharArray()){
-            s.add(e);
+        while (word2.equals(word1)) {
+            word2 = words.get(random.nextInt(words.size()));
         }
-        for(Character c : s) {
-            stackedLayout.push(new LetterTile(this , c));
-            }
+
+        String scrambled = scramble(word1, word2);
+        for (int i = 0; i < scrambled.length(); i++) {
+            stackedLayout.push(new LetterTile(this, scrambled.charAt(i)));
+        }
 
         return true;
     }
 
     public boolean onUndo(View view) {
-        if(!placedTiles.isEmpty() && placedTiles.size()<(WORD_LENGTH*2))
-            (placedTiles.pop()).moveToViewGroup(stackedLayout);
+        if (!placedTiles.isEmpty() && placedTiles.size() < (WORD_LENGTH * 2)) {
+            placedTiles.pop().moveToViewGroup(stackedLayout);
+        }
         return true;
     }
 }
