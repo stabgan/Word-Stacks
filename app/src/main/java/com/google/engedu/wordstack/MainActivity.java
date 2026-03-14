@@ -17,15 +17,15 @@ package com.google.engedu.wordstack;
 
 import android.content.res.AssetManager;
 import android.graphics.Color;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.DragEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,31 +40,18 @@ public class MainActivity extends AppCompatActivity {
     private static final int WORD_LENGTH = 5;
     public static final int LIGHT_BLUE = Color.rgb(176, 200, 255);
     public static final int LIGHT_GREEN = Color.rgb(200, 255, 200);
-    private ArrayList<String> words = new ArrayList<>();
-    private Random random = new Random();
+    private final ArrayList<String> words = new ArrayList<>();
+    private final Random random = new Random();
     private StackedLayout stackedLayout;
     private String word1, word2;
-    private Stack<LetterTile> placedTiles = new Stack<>();
+    private final Stack<LetterTile> placedTiles = new Stack<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AssetManager assetManager = getAssets();
-        try {
-            InputStream inputStream = assetManager.open("words.txt");
-            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = in.readLine()) != null) {
-                String word = line.trim();
-                if (word.length() == WORD_LENGTH) {
-                    words.add(word);
-                }
-            }
-            in.close();
-        } catch (IOException e) {
-            Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG).show();
-        }
+        loadDictionary();
+
         LinearLayout verticalLayout = findViewById(R.id.vertical_layout);
         stackedLayout = new StackedLayout(this);
         verticalLayout.addView(stackedLayout, 3);
@@ -75,26 +62,28 @@ public class MainActivity extends AppCompatActivity {
         word2LinearLayout.setOnDragListener(new DragListener());
     }
 
-    private class TouchListener implements View.OnTouchListener {
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN && !stackedLayout.empty()) {
-                LetterTile tile = (LetterTile) stackedLayout.peek();
-                tile.moveToViewGroup((ViewGroup) v);
-                if (stackedLayout.empty()) {
-                    TextView messageBox = findViewById(R.id.message_box);
-                    messageBox.setText(word1 + " " + word2);
+    /**
+     * Loads 5-letter words from the bundled dictionary asset.
+     */
+    private void loadDictionary() {
+        AssetManager assetManager = getAssets();
+        try (InputStream inputStream = assetManager.open("words.txt");
+             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                String word = line.trim();
+                if (word.length() == WORD_LENGTH) {
+                    words.add(word);
                 }
-                placedTiles.push(tile);
-                return true;
             }
-            return false;
+        } catch (IOException e) {
+            Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG).show();
         }
     }
 
     private class DragListener implements View.OnDragListener {
 
+        @Override
         public boolean onDrag(View v, DragEvent event) {
             switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED:
@@ -127,6 +116,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Interleaves characters from two words randomly while preserving
+     * each word's internal character order, then reverses the result
+     * so the stack pops letters in the correct sequence.
+     */
     public String scramble(String word1, String word2) {
         int c1 = 0, c2 = 0;
         StringBuilder res = new StringBuilder();
@@ -150,6 +144,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean onStartGame(View view) {
+        if (words.size() < 2) {
+            Toast.makeText(this, "Dictionary too small to play", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         stackedLayout.clear();
         placedTiles.clear();
         ((LinearLayout) findViewById(R.id.word1)).removeAllViews();
@@ -172,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean onUndo(View view) {
-        if (!placedTiles.isEmpty() && placedTiles.size() < (WORD_LENGTH * 2)) {
+        if (!placedTiles.isEmpty()) {
             placedTiles.pop().moveToViewGroup(stackedLayout);
         }
         return true;

@@ -15,6 +15,7 @@
 
 package com.google.engedu.wordstack;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Color;
@@ -24,10 +25,11 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.TextView;
 
+@SuppressLint("ViewConstructor")
 public class LetterTile extends TextView {
 
     public static final int TILE_SIZE = 150;
-    private Character letter;
+    private final Character letter;
     private boolean frozen;
 
     public LetterTile(Context context, Character letter) {
@@ -66,6 +68,7 @@ public class LetterTile extends TextView {
         frozen = false;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && !frozen) {
@@ -78,5 +81,10 @@ public class LetterTile extends TextView {
             return true;
         }
         return super.onTouchEvent(motionEvent);
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 }
